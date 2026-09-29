@@ -156,3 +156,14 @@ main {
     height: 180px;
   }
 }
+.monster img {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: manipulation;
+  transition: transform 0.1s;
+}
+
+.monster img:active {
+  transform: scale(0.9);
+}
