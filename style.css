@@ -167,3 +167,10 @@ main {
 .monster img:active {
   transform: scale(0.9);
 }
+.monster img {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  touch-action: manipulation;
+}
