@@ -546,3 +546,310 @@ if (catchButton) {
 // =========================
 
 updateGame();
+let coins = 0;
+
+let activePokemon = null;
+let enemyIndex = 0;
+let enemyLevel = 1;
+
+let enemyHp = 100;
+let enemyMaxHp = 100;
+
+let caughtPokemon = [];
+
+const enemies = [
+  {
+    name: "Pikachu",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
+    baseHp: 100
+  },
+  {
+    name: "Glumanda",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png",
+    baseHp: 120
+  },
+  {
+    name: "Schiggy",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
+    baseHp: 140
+  },
+  {
+    name: "Bisasam",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+    baseHp: 160
+  }
+];
+
+const coinsElement = document.getElementById("coins");
+const levelElement = document.getElementById("level");
+const powerElement = document.getElementById("power");
+
+const monsterName = document.getElementById("monsterName");
+const monsterImage = document.getElementById("monsterImage");
+
+const hpText = document.getElementById("hpText");
+const hpBar = document.getElementById("hpBar");
+
+const message = document.getElementById("message");
+const collection = document.getElementById("collection");
+
+const catchButton = document.getElementById("catchButton");
+
+function updateGame() {
+
+  coinsElement.textContent = coins;
+
+  if (activePokemon !== null && caughtPokemon[activePokemon]) {
+
+    levelElement.textContent =
+      caughtPokemon[activePokemon].level;
+
+    powerElement.textContent =
+      caughtPokemon[activePokemon].power;
+
+  } else {
+
+    levelElement.textContent = 0;
+    powerElement.textContent = 1;
+  }
+
+  const enemy = enemies[enemyIndex];
+
+  monsterName.textContent =
+    enemy.name + " – Level " + enemyLevel;
+
+  monsterImage.src = enemy.image;
+  monsterImage.alt = enemy.name;
+
+  hpText.textContent =
+    enemyHp + " / " + enemyMaxHp;
+
+  hpBar.style.width =
+    (enemyHp / enemyMaxHp * 100) + "%";
+
+  if (enemyHp <= 0) {
+    catchButton.style.display = "block";
+  } else {
+    catchButton.style.display = "none";
+  }
+
+  showCollection();
+}
+
+
+// Pokémon angreifen
+function attackEnemy() {
+
+  let damage = 1;
+
+  if (
+    activePokemon !== null &&
+    caughtPokemon[activePokemon]
+  ) {
+    damage = caughtPokemon[activePokemon].power;
+  }
+
+  enemyHp -= damage;
+
+  if (enemyHp < 0) {
+    enemyHp = 0;
+  }
+
+  coins += damage;
+
+  if (enemyHp <= 0) {
+
+    message.textContent =
+      "🎉 " + enemies[enemyIndex].name +
+      " besiegt! Fang es!";
+
+  } else {
+
+    message.textContent =
+      "💥 -" + damage + " HP";
+  }
+
+  updateGame();
+}
+
+
+// Pokémon fangen
+function catchPokemon() {
+
+  if (enemyHp > 0) {
+    return;
+  }
+
+  const enemy = enemies[enemyIndex];
+
+  const pokemon = {
+    name: enemy.name,
+    image: enemy.image,
+    level: enemyLevel,
+    power: enemyLevel
+  };
+
+  caughtPokemon.push(pokemon);
+
+  coins += 100;
+
+  if (activePokemon === null) {
+    activePokemon = 0;
+  }
+
+  message.textContent =
+    "🥎 " + enemy.name +
+    " gefangen! +100 🪙";
+
+  // NEUER GEGNER
+  nextEnemy();
+
+  updateGame();
+}
+
+
+// Neuer Gegner
+function nextEnemy() {
+
+  enemyIndex++;
+
+  if (enemyIndex >= enemies.length) {
+    enemyIndex = 0;
+  }
+
+  enemyLevel++;
+
+  const enemy = enemies[enemyIndex];
+
+  enemyMaxHp =
+    enemy.baseHp +
+    (enemyLevel - 1) * 30;
+
+  enemyHp = enemyMaxHp;
+}
+
+
+// Pokémon auswählen
+function selectPokemon(index) {
+
+  if (!caughtPokemon[index]) {
+    return;
+  }
+
+  activePokemon = index;
+
+  const pokemon = caughtPokemon[index];
+
+  message.textContent =
+    "⚡ " + pokemon.name +
+    " ist jetzt aktiv!";
+
+  updateGame();
+}
+
+
+// Pokémon leveln
+function levelUp(index) {
+
+  const pokemon = caughtPokemon[index];
+
+  if (!pokemon) {
+    return;
+  }
+
+  const cost = pokemon.level * 50;
+
+  if (coins < cost) {
+
+    message.textContent =
+      "❌ Du brauchst " +
+      cost + " Münzen!";
+
+    return;
+  }
+
+  coins -= cost;
+
+  pokemon.level++;
+  pokemon.power++;
+
+  message.textContent =
+    "⭐ " + pokemon.name +
+    " ist jetzt Level " +
+    pokemon.level + "!";
+
+  updateGame();
+}
+
+
+// Sammlung
+function showCollection() {
+
+  if (!collection) {
+    return;
+  }
+
+  collection.innerHTML = "";
+
+  caughtPokemon.forEach(function(pokemon, index) {
+
+    const cost = pokemon.level * 50;
+
+    const card =
+      document.createElement("div");
+
+    card.className = "pokemon-card";
+
+    const active =
+      activePokemon === index;
+
+    card.innerHTML = `
+
+      <img
+        src="${pokemon.image}"
+        alt="${pokemon.name}"
+      >
+
+      <div class="pokemon-info">
+
+        <h3>${pokemon.name}</h3>
+
+        <p>⭐ Level ${pokemon.level}</p>
+
+        <p>💥 Stärke ${pokemon.power}</p>
+
+        <button onclick="selectPokemon(${index})">
+          ${active ? "✅ AKTIV" : "⚡ AUSWÄHLEN"}
+        </button>
+
+        <button onclick="levelUp(${index})">
+          ⬆️ Leveln (${cost} 🪙)
+        </button>
+
+      </div>
+    `;
+
+    collection.appendChild(card);
+  });
+}
+
+
+// Direkt auf Pokémon klicken
+monsterImage.addEventListener(
+  "click",
+  attackEnemy
+);
+
+
+// Fang-Button
+if (catchButton) {
+
+  catchButton.addEventListener(
+    "click",
+    catchPokemon
+  );
+}
+
+
+// Start
+updateGame();
