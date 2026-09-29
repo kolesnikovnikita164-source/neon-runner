@@ -3,36 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PokeClicker</title>
+  <title>Monster Clicker</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <main class="game">
-    <h1>⚡ POKECLICKER ⚡</h1>
+<div class="game">
 
+  <header>
+    <h1>⚡ MONSTER CLICKER</h1>
     <div class="stats">
-      <div id="coins">🪙 Münzen: 0</div>
-      <div id="level">⭐ Level: 1</div>
-      <div id="power">💥 Klick-Power: 1</div>
+      <span>🪙 <b id="coins">0</b></span>
+      <span>⭐ Level <b id="level">1</b></span>
+      <span>💥 Power <b id="power">1</b></span>
     </div>
+  </header>
 
-    <div id="pokemon" class="pokemon">
-      ⚡ Pikachu
-    </div>
+  <main>
 
-    <button class="click-button" onclick="clickPokemon()">
-      👆 KLICKEN!
-    </button>
+    <section class="battle">
+      <h2 id="monsterName">Pikachu</h2>
 
-    <button class="change-button" onclick="changePokemon()">
-      🔄 Neues Pokémon
-    </button>
+      <div class="monster">
+        <img
+          id="monsterImage"
+          src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
+          alt="Monster"
+        >
+      </div>
+
+      <div class="hp">
+        <div id="hpBar"></div>
+      </div>
+
+      <p id="hpText">100 / 100</p>
+
+      <button id="attackButton">
+        ⚡ ANGRIFF
+      </button>
+    </section>
+
+    <aside class="shop">
+      <h2>🛒 SHOP</h2>
+
+      <button id="powerButton">
+        💥 Stärke +1
+        <small>Kosten: <span id="powerCost">25</span> 🪙</small>
+      </button>
+
+      <button id="autoButton">
+        🤖 Auto-Klicker
+        <small>Kosten: <span id="autoCost">100</span> 🪙</small>
+      </button>
+    </aside>
 
   </main>
 
-  <script src="game.js"></script>
+  <section class="message">
+    <span id="message">Besiege das Monster!</span>
+  </section>
+
+</div>
+
+<script src="game.js"></script>
 
 </body>
 </html>
