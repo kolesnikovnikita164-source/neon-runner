@@ -147,4 +147,55 @@ setInterval(function() {
   }
 }, 1000);
 
+updateGame();function saveGame() {
+  const saveData = {
+    coins: coins,
+    level: level,
+    power: power,
+    hp: hp,
+    powerCost: powerCost,
+    autoCost: autoCost,
+    autoClickers: autoClickers,
+    monsterIndex: monsterIndex
+  };
+
+  localStorage.setItem(
+    "monsterClickerSave",
+    JSON.stringify(saveData)
+  );
+}
+
+function loadGame() {
+  const saved = localStorage.getItem("monsterClickerSave");
+
+  if (!saved) {
+    return;
+  }
+
+  try {
+    const data = JSON.parse(saved);
+
+    coins = Number(data.coins) || 0;
+    level = Number(data.level) || 1;
+    power = Number(data.power) || 1;
+    hp = Number(data.hp) || maxHp;
+    powerCost = Number(data.powerCost) || 25;
+    autoCost = Number(data.autoCost) || 100;
+    autoClickers = Number(data.autoClickers) || 0;
+    monsterIndex = Number(data.monsterIndex) || 0;
+
+    if (monsterIndex >= monsters.length) {
+      monsterIndex = 0;
+    }
+
+  } catch {
+    console.log("Spielstand konnte nicht geladen werden.");
+  }
+}
+
+loadGame();
 updateGame();
+
+setInterval(saveGame, 5000);
+
+window.addEventListener("beforeunload", saveGame);
