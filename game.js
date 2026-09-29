@@ -5,9 +5,8 @@ let power = 1;
 let hp = 100;
 const maxHp = 100;
 
-let powerCost = 25;
-let autoCost = 100;
-let autoClickers = 0;
+let monsterIndex = 0;
+let caughtPokemon = [];
 
 const monsters = [
   {
@@ -28,37 +27,31 @@ const monsters = [
   }
 ];
 
-let monsterIndex = 0;
-
+const monsterImage = document.getElementById("monsterImage");
+const monsterName = document.getElementById("monsterName");
+const hpText = document.getElementById("hpText");
+const hpBar = document.getElementById("hpBar");
 const coinsElement = document.getElementById("coins");
 const levelElement = document.getElementById("level");
 const powerElement = document.getElementById("power");
-
-const hpBar = document.getElementById("hpBar");
-const hpText = document.getElementById("hpText");
-
-const monsterName = document.getElementById("monsterName");
-const monsterImage = document.getElementById("monsterImage");
-
 const message = document.getElementById("message");
-
-const powerCostElement = document.getElementById("powerCost");
-const autoCostElement = document.getElementById("autoCost");
+const collection = document.getElementById("collection");
 
 function updateGame() {
   coinsElement.textContent = coins;
   levelElement.textContent = level;
   powerElement.textContent = power;
 
-  hpText.textContent = hp + " / " + maxHp;
+  const monster = monsters[monsterIndex];
 
+  monsterName.textContent = monster.name;
+  monsterImage.src = monster.image;
+  monsterImage.alt = monster.name;
+
+  hpText.textContent = hp + " / " + maxHp;
   hpBar.style.width = (hp / maxHp * 100) + "%";
 
-  powerCostElement.textContent = powerCost;
-  autoCostElement.textContent = autoCost;
-
-  monsterName.textContent = monsters[monsterIndex].name;
-  monsterImage.src = monsters[monsterIndex].image;
+  showCollection();
 }
 
 function attack() {
@@ -71,20 +64,40 @@ function attack() {
   coins += power;
 
   if (hp === 0) {
-    defeatMonster();
+    message.textContent = "🥎 Du kannst " + monsters[monsterIndex].name + " fangen!";
   }
 
   updateGame();
 }
 
-function defeatMonster() {
-  const reward = 50 + level * 10;
+function catchPokemon() {
+  if (hp > 0) {
+    message.textContent = "❌ Das Pokémon hat noch zu viel HP!";
+    return;
+  }
 
-  coins += reward;
-  level++;
+  const monster = monsters[monsterIndex];
 
-  message.textContent =
-    "🎉 Monster besiegt! +" + reward + " Münzen";
+  const alreadyCaught = caughtPokemon.find(
+    pokemon => pokemon.name === monster.name
+  );
+
+  if (!alreadyCaught) {
+    caughtPokemon.push({
+      name: monster.name,
+      image: monster.image,
+      level: 1,
+      power: 1
+    });
+
+    coins += 100;
+
+    message.textContent =
+      "🎉 " + monster.name + " wurde gefangen! +100 Münzen";
+  } else {
+    message.textContent =
+      "⭐ Du hast " + monster.name + " schon gefangen!";
+  }
 
   monsterIndex++;
 
@@ -93,109 +106,61 @@ function defeatMonster() {
   }
 
   hp = maxHp;
-}
-
-function buyPower() {
-  if (coins < powerCost) {
-    message.textContent = "❌ Nicht genug Münzen!";
-    return;
-  }
-
-  coins -= powerCost;
-  power++;
-
-  powerCost = Math.floor(powerCost * 1.5);
-
-  message.textContent = "💥 Deine Power wurde verbessert!";
 
   updateGame();
 }
 
-function buyAutoClick() {
-  if (coins < autoCost) {
+function levelUp(index) {
+  const pokemon = caughtPokemon[index];
+
+  const cost = pokemon.level * 50;
+
+  if (coins < cost) {
     message.textContent = "❌ Nicht genug Münzen!";
     return;
   }
 
-  coins -= autoCost;
-  autoClickers++;
+  coins -= cost;
 
-  autoCost = Math.floor(autoCost * 1.7);
+  pokemon.level++;
+  pokemon.power++;
 
   message.textContent =
-    "🤖 Auto-Klicker gekauft!";
+    "⬆️ " + pokemon.name + " ist jetzt Level " + pokemon.level + "!";
 
   updateGame();
 }
 
-document
-  .getElementById("attackButton")
-  .addEventListener("click", attack);
+function showCollection() {
+  collection.innerHTML = "";
 
-document
-  .getElementById("powerButton")
-  .addEventListener("click", buyPower);
+  caughtPokemon.forEach(function(pokemon, index) {
+    const cost = pokemon.level * 50;
 
-document
-  .getElementById("autoButton")
-  .addEventListener("click", buyAutoClick);
+    const card = document.createElement("div");
 
-setInterval(function() {
-  if (autoClickers > 0) {
-    coins += autoClickers;
-    updateGame();
-  }
-}, 1000);
+    card.className = "pokemon-card";
 
-updateGame();function saveGame() {
-  const saveData = {
-    coins: coins,
-    level: level,
-    power: power,
-    hp: hp,
-    powerCost: powerCost,
-    autoCost: autoCost,
-    autoClickers: autoClickers,
-    monsterIndex: monsterIndex
-  };
+    card.innerHTML = `
+      <img src="${pokemon.image}" alt="${pokemon.name}">
+      <div>
+        <b>${pokemon.name}</b>
+        <p>⭐ Level ${pokemon.level}</p>
+        <p>💥 Stärke ${pokemon.power}</p>
+        <button onclick="levelUp(${index})">
+          ⬆️ Leveln (${cost} 🪙)
+        </button>
+      </div>
+    `;
 
-  localStorage.setItem(
-    "monsterClickerSave",
-    JSON.stringify(saveData)
-  );
+    collection.appendChild(card);
+  });
 }
 
-function loadGame() {
-  const saved = localStorage.getItem("monsterClickerSave");
+monsterImage.addEventListener("click", attack);
 
-  if (!saved) {
-    return;
-  }
+document
+  .getElementById("catchButton")
+  .addEventListener("click", catchPokemon);
 
-  try {
-    const data = JSON.parse(saved);
-
-    coins = Number(data.coins) || 0;
-    level = Number(data.level) || 1;
-    power = Number(data.power) || 1;
-    hp = Number(data.hp) || maxHp;
-    powerCost = Number(data.powerCost) || 25;
-    autoCost = Number(data.autoCost) || 100;
-    autoClickers = Number(data.autoClickers) || 0;
-    monsterIndex = Number(data.monsterIndex) || 0;
-
-    if (monsterIndex >= monsters.length) {
-      monsterIndex = 0;
-    }
-
-  } catch {
-    console.log("Spielstand konnte nicht geladen werden.");
-  }
-}
-
-loadGame();
 updateGame();
-
-setInterval(saveGame, 5000);
-
-window.addEventListener("beforeunload", saveGame);
