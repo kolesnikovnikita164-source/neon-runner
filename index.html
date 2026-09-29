@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Runner X</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <main class="game">
+
+    <h1>⚡ NEON RUNNER X</h1>
+
+    <div class="hud">
+      <span id="level">🌍 Welt 1</span>
+      <span id="score">⭐ 0</span>
+      <span id="coins">🪙 0</span>
+      <span id="hp">❤️ 3</span>
+      <span id="xp">XP 0/100</span>
+    </div>
+
+    <canvas id="gameCanvas" width="900" height="500"></canvas>
+
+    <div class="controls">
+      <button id="left">⬅</button>
+      <button id="jump">⬆ Springen</button>
+      <button id="right">➡</button>
+      <button id="attack">⚔ Angriff</button>
+      <button id="restart">🔄</button>
+    </div>
+
+    <p id="message">Sammle Coins und besiege den Boss!</p>
+
+  </main>
+
+  <script src="game.js"></script>
+
+</body>
+</html>
