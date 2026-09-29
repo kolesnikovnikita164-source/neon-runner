@@ -1,14 +1,15 @@
 let coins = 0;
-let clicks = 0;
 let level = 1;
-
 let power = 1;
-let autoClick = 0;
+
+let hp = 100;
+const maxHp = 100;
 
 let powerCost = 25;
 let autoCost = 100;
+let autoClickers = 0;
 
-const pokemon = [
+const monsters = [
   {
     name: "Pikachu",
     image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
@@ -24,93 +25,124 @@ const pokemon = [
   {
     name: "Bisasam",
     image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
-  },
-  {
-    name: "Evoli",
-    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png"
   }
 ];
 
-let currentPokemon = pokemon[0];
+let monsterIndex = 0;
 
-function clickPokemon() {
+const coinsElement = document.getElementById("coins");
+const levelElement = document.getElementById("level");
+const powerElement = document.getElementById("power");
+
+const hpBar = document.getElementById("hpBar");
+const hpText = document.getElementById("hpText");
+
+const monsterName = document.getElementById("monsterName");
+const monsterImage = document.getElementById("monsterImage");
+
+const message = document.getElementById("message");
+
+const powerCostElement = document.getElementById("powerCost");
+const autoCostElement = document.getElementById("autoCost");
+
+function updateGame() {
+  coinsElement.textContent = coins;
+  levelElement.textContent = level;
+  powerElement.textContent = power;
+
+  hpText.textContent = hp + " / " + maxHp;
+
+  hpBar.style.width = (hp / maxHp * 100) + "%";
+
+  powerCostElement.textContent = powerCost;
+  autoCostElement.textContent = autoCost;
+
+  monsterName.textContent = monsters[monsterIndex].name;
+  monsterImage.src = monsters[monsterIndex].image;
+}
+
+function attack() {
+  hp -= power;
+
+  if (hp < 0) {
+    hp = 0;
+  }
+
   coins += power;
-  clicks++;
 
-  checkLevel();
+  if (hp === 0) {
+    defeatMonster();
+  }
+
   updateGame();
 }
 
-function checkLevel() {
-  level = Math.floor(clicks / 20) + 1;
+function defeatMonster() {
+  const reward = 50 + level * 10;
+
+  coins += reward;
+  level++;
+
+  message.textContent =
+    "🎉 Monster besiegt! +" + reward + " Münzen";
+
+  monsterIndex++;
+
+  if (monsterIndex >= monsters.length) {
+    monsterIndex = 0;
+  }
+
+  hp = maxHp;
 }
 
 function buyPower() {
   if (coins < powerCost) {
-    alert("❌ Nicht genug Münzen!");
+    message.textContent = "❌ Nicht genug Münzen!";
     return;
   }
 
   coins -= powerCost;
   power++;
 
-  powerCost = Math.floor(powerCost * 1.6);
+  powerCost = Math.floor(powerCost * 1.5);
+
+  message.textContent = "💥 Deine Power wurde verbessert!";
 
   updateGame();
 }
 
 function buyAutoClick() {
   if (coins < autoCost) {
-    alert("❌ Nicht genug Münzen!");
+    message.textContent = "❌ Nicht genug Münzen!";
     return;
   }
 
   coins -= autoCost;
-  autoClick++;
+  autoClickers++;
 
-  autoCost = Math.floor(autoCost * 1.8);
+  autoCost = Math.floor(autoCost * 1.7);
 
-  updateGame();
-}
-
-function changePokemon() {
-  const random = Math.floor(Math.random() * pokemon.length);
-
-  currentPokemon = pokemon[random];
+  message.textContent =
+    "🤖 Auto-Klicker gekauft!";
 
   updateGame();
 }
 
-function updateGame() {
-  document.getElementById("pokemonName").textContent =
-    currentPokemon.name;
+document
+  .getElementById("attackButton")
+  .addEventListener("click", attack);
 
-  document.getElementById("pokemonImage").src =
-    currentPokemon.image;
+document
+  .getElementById("powerButton")
+  .addEventListener("click", buyPower);
 
-  document.getElementById("pokemonImage").alt =
-    currentPokemon.name;
+document
+  .getElementById("autoButton")
+  .addEventListener("click", buyAutoClick);
 
-  document.getElementById("coins").textContent =
-    "🪙 " + coins;
-
-  document.getElementById("level").textContent =
-    "⭐ Level " + level;
-
-  document.getElementById("power").textContent =
-    "💥 Power " + power;
-
-  document.getElementById("powerCost").textContent =
-    "Kosten: " + powerCost + " 🪙";
-
-  document.getElementById("autoCost").textContent =
-    "Kosten: " + autoCost + " 🪙";
-}
-
-// Auto-Klicker
 setInterval(function() {
-  if (autoClick > 0) {
-    coins += autoClick;
+  if (autoClickers > 0) {
+    coins += autoClickers;
     updateGame();
   }
 }, 1000);
